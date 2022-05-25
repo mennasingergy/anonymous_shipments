@@ -4,13 +4,15 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import {} from 'dotenv/config';
 
+
+
 import postRoutes from './routes/shipments.js'
 
 const app=express();
 const port= process.env.PORT || 5000;
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/shipments',postRoutes);
 
 
