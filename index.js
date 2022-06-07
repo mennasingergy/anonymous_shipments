@@ -13,10 +13,10 @@ const port= process.env.PORT || 5000;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use('/shipments',postRoutes);
 
 
 app.use(cors());
+app.use('/shipments',postRoutes);
 app.use(express.json());
 
 const uri=process.env.ATLAS_URI;
