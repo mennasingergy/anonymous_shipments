@@ -11,7 +11,7 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
 app.get('/api/shipments/test', (req, res) => {
-  return res.send(`Mongo URL: ${ process.env.MONGO_URI}`);
+  return res.send(`Mongo URL: ${process.env.MONGO_URI}`);
 });
 
 app.get('/api/find/:search', async (req, res) => {
