@@ -36,6 +36,9 @@ app.get('/api/shipments/:order_id', async (req, res) => {
 
 app.post('/api/shipments', async (req, res) => {
   try {
+    const db = await mongoClient();
+    if (!db) res.status(500).send('Systems Unavailable');
+    
     console.log('[createShipment body]', req.body)
     const { order_id } = req.body;
     if (!order_id) return res.status(403).send('order_id is required');
