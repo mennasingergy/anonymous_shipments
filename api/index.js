@@ -7,7 +7,8 @@ const ShipmentModel = require("./mongoose");
 
 const app = express();
 
-app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
 
 app.get('/api/find/:search', async (req, res) => {
   const { search } = req.params;
