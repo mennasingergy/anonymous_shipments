@@ -10,6 +10,10 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
+app.get('/api/shipments/test', (req, res) => {
+  return res.send('Hello World!');
+});
+
 app.get('/api/find/:search', async (req, res) => {
   const { search } = req.params;
   //res.send("search for this product");
