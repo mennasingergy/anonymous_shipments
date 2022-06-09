@@ -21,9 +21,8 @@ app.get('/api/find/:search', async (req, res) => {
 
   const { search } = req.params;
   //res.send("search for this product");
-  await db.collection('shipments').find({ "order_id": { $regex: search, $options: "i" } })
-  .then(shipments => res.json(shipments))
-  .catch(err => res.status(400).json('Error: ' + err));
+  const results = await db.collection('shipments').find({ "order_id": { $regex: search, $options: "i" } }).toArray();
+  res.status(200).send({ body: results, message: 'Successfully retrieved search results' });
 });
 
 app.get('/api/shipments/:order_id', async (req, res) => {
@@ -61,6 +60,7 @@ app.post('/api/shipments', async (req, res) => {
     quantity: 1,
     id: uuid(),
   };
+  console.log('newOrder :>> ', newOrder);
   await db.collection('shipments').insertOne(newOrder);
 
   return res.send(newOrder);
