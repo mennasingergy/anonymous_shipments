@@ -28,8 +28,7 @@ app.get('/api/shipments/:order_id', async (req, res) => {
   console.log('req.params.order_id :>> ', req.params.order_id);
   console.log('req.params.order_id :>> ', typeof req.params.order_id);
 
-  // const shipment = await ShipmentModel.findOneAndUpdate({ order_Id: req.params.order_id });
-  const shipment = await db.collection('shipments').findOne({ order_Id: req.params.order_id });
+  const shipment = await db.collection('shipments').findOne({ order_id: req.params.order_id });
   console.log('shipment :>> ', shipment);
   res.status(200).send({ body: shipment, message: 'Successfully retrieved shipment' });
 });
