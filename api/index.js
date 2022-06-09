@@ -1,10 +1,10 @@
 require("dotenv").config();
 const express = require("express");
-const mongoose = require("mongoose");
+// const mongoose = require("mongoose");
 const bodyParser = require('body-parser');
 // const connectDB = require("./db");
 const { mongoClient } = require('./mongo');
-const ShipmentModel = require("./mongoose");
+// const ShipmentModel = require("./mongoose");
 
 const app = express();
 
@@ -26,12 +26,12 @@ app.get('/api/find/:search', async (req, res) => {
   .catch(err => res.status(400).json('Error: ' + err));
 });
 
-app.get('/api/shipments', async (req, res) => {
+app.get('/api/shipments/:order_id', async (req, res) => {
   const db = await mongoClient();
   if (!db) res.status(500).send('Systems Unavailable');
 
   // const shipment = await ShipmentModel.findOneAndUpdate({ order_Id: req.params.order_id });
-  const shipment = await db.collection('shipments').findOneAndUpdate({ order_Id: req.params.order_id });
+  const shipment = await db.collection('shipments').findOne({ order_Id: req.params.order_id });
   res.status(200).send({ body: shipment, message: 'Successfully retrieved shipment' });
 });
 
