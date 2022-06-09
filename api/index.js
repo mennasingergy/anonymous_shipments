@@ -17,7 +17,6 @@ app.get('/api/find/:search', async (req, res) => {
   if (!db) res.status(500).send('Systems Unavailable');
 
   const { search } = req.params;
-  //res.send("search for this product");
   const results = await db.collection('shipments').find({ "order_id": { $regex: search, $options: "i" } }).toArray();
   res.status(200).send({ body: results, message: 'Successfully retrieved search results' });
 });
@@ -25,11 +24,8 @@ app.get('/api/find/:search', async (req, res) => {
 app.get('/api/shipments/:order_id', async (req, res) => {
   const db = await mongoClient();
   if (!db) res.status(500).send('Systems Unavailable');
-  console.log('req.params.order_id :>> ', req.params.order_id);
-  console.log('req.params.order_id :>> ', typeof req.params.order_id);
 
   const shipment = await db.collection('shipments').findOne({ order_id: req.params.order_id });
-  console.log('shipment :>> ', shipment);
   res.status(200).send({ body: shipment, message: 'Successfully retrieved shipment' });
 });
 
