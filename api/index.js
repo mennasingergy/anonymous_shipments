@@ -26,6 +26,7 @@ app.get('/api/shipments/:order_id', async (req, res) => {
   const db = await mongoClient();
   if (!db) res.status(500).send('Systems Unavailable');
   console.log('req.params.order_id :>> ', req.params.order_id);
+  console.log('req.params.order_id :>> ', typeof req.params.order_id);
 
   // const shipment = await ShipmentModel.findOneAndUpdate({ order_Id: req.params.order_id });
   const shipment = await db.collection('shipments').findOne({ order_Id: req.params.order_id });
