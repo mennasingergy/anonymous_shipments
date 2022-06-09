@@ -35,35 +35,22 @@ app.get('/api/shipments/:order_id', async (req, res) => {
 });
 
 app.post('/api/shipments', async (req, res) => {
-  // try {
-  //   console.log('[createShipment body]', req.body)
-  //   const { order_id } = req.body;
-  //   if (!order_id) return res.status(403).send('order_id is required');
+  try {
+    console.log('[createShipment body]', req.body)
+    const { order_id } = req.body;
+    if (!order_id) return res.status(403).send('order_id is required');
 
-  //   const shipment = await ShipmentModel.findOne({ order_id: order_id });
-  //   if (shipment) return res.status(403).send('Document already exists, cannot create');
+    const shipment = await db.collection('shipments').findOne({ order_id });
+    if (shipment) return res.status(403).send('Document already exists, cannot create');
 
-  //   const shipmentStatus = 'CREATED';
+    const shipmentStatus = 'CREATED';
 
-  //   const newShipmentDocument = await ShipmentModel.create({ order_id: order_id, shipment_status: shipmentStatus });
-  //   return res.status(200).send({ body: newShipmentDocument, message: 'Successfully created shipment' });
-  // }
-  // catch (e) {
-  //   console.log('[createShipment] e', e)
-  // }
-  const db = await mongoClient();
-  if (!db) res.status(500).send('Systems Unavailable');
-
-  const newOrder = {
-    name: req.body.name,
-    price: req.body.price,
-    quantity: 1,
-    id: uuid(),
-  };
-  console.log('newOrder :>> ', newOrder);
-  await db.collection('shipments').insertOne(newOrder);
-
-  return res.send(newOrder);
+    const newShipmentDocument = await db.collection('shipments').insertOne({ order_id, shipment_status: shipmentStatus });
+    return res.status(200).send({ body: newShipmentDocument, message: 'Successfully created shipment' });
+  }
+  catch (e) {
+    console.log('[createShipment] e', e)
+  }
 });
 
 // app.patch('/api/shipments', async (req, res) => {
