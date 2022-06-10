@@ -22,11 +22,21 @@ app.get('/api/find/:search', async (req, res) => {
 });
 
 app.get('/api/shipments/:order_id', async (req, res) => {
-  const db = await mongoClient();
-  if (!db) res.status(500).send('Systems Unavailable');
+  try{
+    const db = await mongoClient();
+    if (!db) res.status(500).send('Systems Unavailable');
+     // const { order_id } = createShipment.order_id;
+     console.log('[getShipment body]', req.params.order_id)
+    const { order_id} = req.params.order_id;
+
 
   const shipment = await db.collection('shipments').findOne({ order_id: req.params.order_id });
-  res.status(200).send({ body: {order_id}, message: 'Successfully retrieved shipment' });
+  res.status(200).send({ body:req.params.order_id , message: 'Successfully retrieved shipment' });
+  }
+  catch (e) {
+    console.log('[getShipment] e', e)
+  }
+
 });
 
 app.post('/api/shipments', async (req, res) => {
