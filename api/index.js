@@ -2,10 +2,36 @@ require("dotenv").config();
 const express = require("express");
 const bodyParser = require('body-parser');
 const { mongoClient } = require('./mongo');
+const { uuid } = require('uuidv4');
+const cors= require('cors');
+
 
 const app = express();
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", value="*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header("Access-Control-Allow-Methods","POST,PATCH,GET,DELETE");
+  next();
+});
+app.use(function (req, res, next) {
 
-app.use(bodyParser.urlencoded({ extended: false }))
+    // Request methods you wish to allow
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+
+    // Request headers you wish to allow
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+
+    // Set to true if you need the website to include cookies in the requests sent
+    // to the API (e.g. in case you use sessions)
+    res.setHeader('Access-Control-Allow-Credentials', true);
+
+    // Pass to next layer of middleware
+    next();
+});
+app.use(cors({ origin : '*'}));
+
+
+app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
 app.get('/api/shipments/test', (req, res) => {
@@ -25,13 +51,11 @@ app.get('/api/shipments/:order_id', async (req, res) => {
   try{
     const db = await mongoClient();
     if (!db) res.status(500).send('Systems Unavailable');
-     // const { order_id } = createShipment.order_id;
      console.log('[getShipment body]', req.params.order_id)
     const { order_id} = req.params.order_id;
 
-
   const shipment = await db.collection('shipments').findOne({ order_id: req.params.order_id });
-  res.status(200).send({ body:req.params.order_id , message: 'Successfully retrieved shipment' });
+  return res.status(200).send(shipment);
   }
   catch (e) {
     console.log('[getShipment] e', e)
@@ -47,32 +71,31 @@ app.post('/api/shipments', async (req, res) => {
     console.log('[createShipment body]', req.body)
     const { order_id ,shipment_status} = req.body;
     
-    if (!order_id) return res.status(403).send('order_id is required');
+    //if (!order_id) return res.status(403).send('order_id is required');
 
-    const shipment = await db.collection('shipments').findOne({ order_id });
-    if (shipment) return res.status(403).send('Document already exists, cannot create');
+   // const shipment = await db.collection('shipments').findOne({ order_id });
+   // if (shipment) return res.status(403).send('Document already exists, cannot create');
 
     const shipmentStatus = 'CREATED';
-
     const newShipmentDocument = await db.collection('shipments').insertOne({ order_id, shipment_status: shipmentStatus });
-    return res.status(200).send({ body: {order_id,shipment_status}, message: 'Successfully created shipment' });
+    const rr=await db.collection('shipments').findOne({ order_id:order_id}); 
+    return res.status(200).send(rr);
   }
   catch (e) {
     console.log('[createShipment] e', e)
   }
 });
 
- app.patch('/api/shipments', async (req, res) => {
+ app.patch('/api/shipments/:order_id', async (req, res) => {
   try {
     const db = await mongoClient();
     if (!db) res.status(500).send('Systems Unavailable');
-     // const { order_id } = createShipment.order_id;
-     const { order_id,shipment_status } = req.body;
-   console.log('order_id', order_id);
- if (!order_id) return res.status(403).send('order_id is required');
+     const  {order_id}  = req.params;
+   //console.log('order_id', order_id);
+ //if (!order_id) return res.status(403).send('order_id is required');
 
       const shipment = await db.collection('shipments').findOne({ order_id:order_id });
-      if (!shipment) return res.status(403).send('could not find order_id');
+     // if (!shipment) return res.status(403).send('could not find order_id');
  
 //     // fetch shipment from db for this order_id
 //     // determine what the current status is
@@ -82,25 +105,27 @@ app.post('/api/shipments', async (req, res) => {
      const currentShipmentStatus = shipment.shipment_status;
     const nextShipmentStatus = {
        "CREATED": "SHIPPED",
-       "SHIPPED": "DELIVERED"
+       "SHIPPED": "DELIVERED",
+       "DELIVERED":"SHIPPMENT IS SUCCESSFULLY DELIVERED!"
     }
      [currentShipmentStatus];
      
 
- const updatedDocument = await db.collection('shipments').updateOne( {order_id:order_id} ,{$set:{ shipment_status: nextShipmentStatus} },{ returnDocument: true });
-     return res.status(200).send({ body:await db.collection('shipments').findOne({order_id:order_id}) , message: 'Successfully updated order status' });
+ const updatedDocument = await db.collection('shipments').updateOne( {order_id} ,{$set:{ shipment_status: nextShipmentStatus} },{ returnDocument: true });
+ const newShipment=await db.collection('shipments').findOne({order_id:order_id});
+     return res.status(200).send(newShipment);
 
   } catch (e) {
      console.log('[updateShipment] e', e)
    }
  });
 
- app.delete('/api/shipments', async (req, res) => {
+ app.delete('/api/shipments/:order_id', async (req, res) => {
    try {
     const db = await mongoClient();
     if (!db) res.status(500).send('Systems Unavailable');
      console.log('[cancelShipment body]', req.body)
-     const { order_id } = req.body;
+     const {order_id}  = req.params;
      if (!order_id) return res.status(403).send('order_id is required');
 
      const shipment = await db.collection('shipments').findOne({ order_id: order_id });
@@ -108,7 +133,8 @@ app.post('/api/shipments', async (req, res) => {
 
      if (shipment.shipment_status === 'CREATED') {
       await db.collection('shipments').updateOne({ order_id }, {$set:{ shipment_status: 'CANCELED' }});
-       return res.status(200).send({ body: await db.collection('shipments').findOne({order_id:order_id}), message: 'Your Shipment has been canceled' });
+      const xx=await db.collection('shipments').findOne({order_id:order_id});
+       return res.status(200).send(xx);
      }
      return res.status(200).send({ body: shipment.shipment_status, message: 'Cannot cancel this shipments' });   }
       catch (e) {
